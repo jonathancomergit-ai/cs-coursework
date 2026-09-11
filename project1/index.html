@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+	<meta charset="utf-8">
+	<title>MathVoid</title>
+</head>
+
+<body id="page_top">
+
+<!-- ===== HEADER ===== -->
+<header id="title_card">
+	<hgroup>
+		<h1>MathVoid</h1>
+		<h2>My first game where you use math to get around!</h2>
+	</hgroup>
+
+	<!-- these all jump further down the page -->
+	<nav>
+		<ul>
+			<li><a href="#the_void">The Void</a></li>
+			<li><a href="#controls_list">Controls</a></li>
+			<li><a href="#solving_level_1">Solving Level 1</a>
+				<ul>
+					<li><a href="#working_equations">Equations That Work</a></li>
+				</ul>
+			</li>
+			<li><a href="#dev_log">Dev Log</a></li>
+			<li><a href="#glossary">Glossary</a></li>
+		</ul>
+	</nav>
+
+	
+	<p>
+		MathVoid is a game I'm working on in the Godot engine. The premise of the game is 
+		you start in a void on a platform. There will also be a random platform somewhere else.
+		You use T to open the console and insert math equations. Those equations then get drawn
+		into walkable paths.
+	</p>
+</header>
+
+<hr>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main>
+
+<!-- what the game actually is -->
+<section id="the_void">
+	<h3>The Void</h3>
+
+	<p>The whole level is just empty black space. You get one platform to stand on and another one across a gap. That is it! The exit sits <em>higher</em> than where you start, so a flat line will not get you there.</p>
+
+	<figure>
+		<figcaption>
+			<h4>Before Graphing</h4>
+			<p>Where you start and where you need to get to. Nothing in between!</p>
+		</figcaption>
+		<img src="images/mathvoid-the-void.png" alt="Two small platforms floating far apart in an empty black void" width="600">
+	</figure>
+
+	<p>Press <strong>T</strong> to open the console, type a function, hit Enter. The game takes what you typed and turns it into a bunch of points, builds a mesh out of those points, then sticks collision on it. That is the whole loop! Type it, then stand on it.</p>
+
+	<p>I'm still very new to programming and learning a lot but the core mechanics do function! I'm working on adding more levels and features!</p>
+	
+	<figure>
+		<figcaption>
+			<h4>Level 1 Solved</h4>
+			<p>This one is <code>2/(1+exp(-0.6*x)) + sin(2*x)/6</code>. It starts flat, ripples up through the middle and flattens back out right at the yellow exit. My favorite one so far!</p>
+		</figcaption>
+		<img src="images/mathvoid-level1.png" alt="A glowing cyan curve rising from a blue platform to a yellow platform in a black void" width="600">
+	</figure>
+</section>
+
+<!-- controls table -->
+<section id="controls_list">
+	<h3>Controls</h3>
+
+	<table border="1">
+		<caption>
+			<h4>Keyboard and Mouse</h4>
+			<p>These are all hard coded right now. Rebinding them is on my list!</p>
+		</caption>
+		<tr>
+			<th>Input</th>
+			<th>Action</th>
+		</tr>
+		<tr>
+			<td>WASD</td>
+			<td>Move</td>
+		</tr>
+		<tr>
+			<td>Mouse</td>
+			<td>Look</td>
+		</tr>
+		<tr>
+			<td>Space</td>
+			<td>Jump</td>
+		</tr>
+		<tr>
+			<td>T</td>
+			<td>Open the equation console</td>
+		</tr>
+		<tr>
+			<td>Enter</td>
+			<td>Graph the function you typed</td>
+		</tr>
+		<tr>
+			<td>Esc</td>
+			<td>Close the console and release the mouse</td>
+		</tr>
+	</table>
+</section>
+
+<!-- how to beat level 1 -->
+<section id="solving_level_1">
+	<h3>Solving Level 1</h3>
+
+	<ol>
+		<li>Walk to the edge and look across the gap.</li>
+		<li>Press <strong>T</strong> to open the console.</li>
+		<li>Type a function that goes UP as x gets bigger.</li>
+		<li>Hit Enter and the curve shows up as a solid surface.</li>
+		<li>Walk out onto it and follow it to the exit!</li>
+	</ol>
+
+	<p>Every new equation replaces the old one, so you can mess around as much as you want.</p>
+
+	<h4 id="working_equations">Equations That Work</h4>
+
+	<!-- pre keeps my spacing exactly how I typed it -->
+	<pre><code> 0.12*x + 1      a sloped line
+				0.04*x*x        a parabola
+			 	sin(x) + 1      a wave</code></pre>
+
+	<p>All three of these will get you to the exit.</p>
+
+	<figure>
+		<figcaption>
+			<h4>The Equation Console</h4>
+			<p>The console pops up at the bottom. That little row underneath it is every function it will accept.</p>
+		</figcaption>
+		<img src="images/mathvoid-console.png" alt="The MathVoid equation console open at the bottom of the screen with a function typed in" width="600">
+	</figure>
+
+	<figure>
+		<figcaption>
+			<h4>Reaching The Exit</h4>
+			<p>Step onto the yellow platform and that is the level done!</p>
+		</figcaption>
+		<img src="images/mathvoid-level-complete.png" alt="LEVEL COMPLETE message displayed after reaching the exit platform" width="600">
+	</figure>
+</section>
+
+<!-- dev log -->
+<article id="dev_log">
+	<h3>Dev Log</h3>
+
+	<h4>Level editor</h4>
+	<p>Posted <time datetime="2026-09-10">September 10, 2026</time></p>
+
+	<p> 
+		Before I was using coordinates to place platforms which was messy and annoying.
+		I've added a new system that allows me to place them in a sort of creative mode!
+		This makes the process much much easier!
+	</p>
+
+
+	<blockquote>
+		The Grapher never changes when you add new math. A line, parabola, and sine wave all just produce a different list of points fed into the same mesh builder.
+	</blockquote>
+
+	<p>So adding a new level barely costs me anything now. The sampling changes but the mesh code stays put!</p>
+
+	<p>Next up is a HUD, and after that I want to try full 3D surfaces where you graph <q>z as a function of x and y</q> instead of just one curve.</p>
+
+	<p>Hopefully this will allow people to make even crazier designs and paths.</p>
+</article>
+
+<!-- words I use that might not make sense -->
+<section id="glossary">
+	<h3>Glossary</h3>
+
+
+	<dl>
+		<dt>Void</dt>
+		<dd>The empty black space everything floats in. There is no ground unless you make it!</dd>
+
+		<dt>Grapher</dt>
+		<dd>The script that takes your typed text, turns it into points, then turns those points into a mesh.</dd>
+
+		<dt>Mesh</dt>
+		<dd>The actual 3D shape you end up seeing on screen.</dd>
+
+		<dt>Collision</dt>
+		<dd>The invisible shape that stops you falling straight through the mesh. Without it the curve is just a picture!</dd>
+
+		<dt>Domain</dt>
+		<dd>The range of x values the game samples. Smaller domain means a shorter bridge.</dd>
+	</dl>
+</section>
+
+</main>
+
+<hr>
+
+<!-- engine credit -->
+<aside id="godot_credit">
+	<h4>Built With Godot</h4>
+
+	<p>I built this in <strong>Godot 4</strong> using GDScript. It is free and open source so anyone can download it and open my project up themselves.</p>
+
+	<!-- godot logo, its on their server not mine. links out to their site -->
+	<a href="https://godotengine.org/" target="_blank">
+		<img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6a/Godot_icon.svg/250px-Godot_icon.svg.png" alt="Godot Engine logo" title="Go to the Godot Engine website" width="120">
+	</a>
+
+	<div><strong>Note:</strong> <em>Click the logo to go to their site.</em></div>
+</aside>
+
+<hr>
+
+<!-- ===== FOOTER ===== -->
+<footer id="page_footer">
+	<h4>About</h4>
+
+	
+	<h5>Contact</h5>
+	<ul>
+		<li>Made by Jonathan Comer for ART 1610 Web Languages</li>
+		<li><a href="mailto:JJc10860@ucmo.edu">JJc10860@ucmo.edu</a></li>
+	
+	</ul>
+
+	<br>
+
+	<p><em>&copy; 2026 Jonathan Comer</em> &mdash; <span>Return to <a href="#page_top">Top</a></span></p>
+</footer>
+
+</body>
+</html>
