@@ -34,3 +34,6 @@ primes.txt
 out/
 *.class
 Particle/primes.txt
+
+# No README until the coursework is further along
+README.md
