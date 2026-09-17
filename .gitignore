@@ -33,7 +33,16 @@ id_rsa*
 primes.txt
 out/
 *.class
-Particle/primes.txt
+
+# --- kept on the PC, never published (reorg 2026-09-14) ---
+# The professor's handouts and the zips that were turned in: their files, not ours to post.
+_Handouts/
+# The ART 1610 class repo is its OWN (private) git repo living inside this folder.
+HTML/ART1610_Class_Repo/
+# HW1's three files carry another person's name in the header and output. No names get published.
+Java/About_Me_Printer/
+Java/Java_Ascii_Art/
+Java/Sum_Of_Two_Numbers/
 
 # No README until the coursework is further along
 README.md

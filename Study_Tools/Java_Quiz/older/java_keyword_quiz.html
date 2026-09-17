@@ -1,0 +1,332 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: transparent; }
+#app {
+  font-family: var(--font-sans);
+  padding: 1.5rem 1rem;
+  max-width: 640px;
+  margin: 0 auto;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+.title { font-size: 18px; font-weight: 500; color: var(--color-text-primary); }
+.score-bar {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+.score-val { font-weight: 500; color: var(--color-text-primary); }
+.card {
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+.category-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: var(--border-radius-md);
+  margin-bottom: 1rem;
+  background: #1a1a2e;
+  color: #9fa8da;
+  border: 0.5px solid #3949ab;
+}
+.prompt {
+  font-size: 16px;
+  color: var(--color-text-primary);
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
+}
+.example {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  background: var(--color-background-secondary);
+  border-radius: var(--border-radius-md);
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 1.25rem;
+  border-left: 2px solid #3949ab;
+}
+.input-row {
+  display: flex;
+  gap: 8px;
+}
+#answer {
+  flex: 1;
+  padding: 10px 14px;
+  font-size: 15px;
+  font-family: var(--font-mono);
+  background: var(--color-background-secondary);
+  border: 0.5px solid var(--color-border-secondary);
+  border-radius: var(--border-radius-md);
+  color: var(--color-text-primary);
+  outline: none;
+}
+#answer:focus { border-color: #3949ab; box-shadow: 0 0 0 2px rgba(57,73,171,0.2); }
+#answer.correct { border-color: #2e7d32; background: rgba(46,125,50,0.08); }
+#answer.wrong { border-color: #c62828; background: rgba(198,40,40,0.08); }
+.btn {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 0.5px solid var(--color-border-secondary);
+  border-radius: var(--border-radius-md);
+  background: transparent;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn:hover { background: var(--color-background-secondary); }
+.btn-primary {
+  background: #1a237e;
+  border-color: #3949ab;
+  color: #c5cae9;
+}
+.btn-primary:hover { background: #283593; }
+.feedback {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--border-radius-md);
+  font-size: 14px;
+  display: none;
+  line-height: 1.5;
+}
+.feedback.correct {
+  display: block;
+  background: rgba(46,125,50,0.1);
+  border: 0.5px solid #2e7d32;
+  color: #66bb6a;
+}
+.feedback.wrong {
+  display: block;
+  background: rgba(198,40,40,0.08);
+  border: 0.5px solid #c62828;
+  color: #ef9a9a;
+}
+.feedback .correct-ans {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  color: #a5d6a7;
+}
+.progress-row {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 1.25rem;
+}
+.pip {
+  height: 4px;
+  flex: 1;
+  border-radius: 2px;
+  background: var(--color-background-secondary);
+  border: 0.5px solid var(--color-border-tertiary);
+}
+.pip.done-correct { background: #2e7d32; border-color: #2e7d32; }
+.pip.done-wrong { background: #c62828; border-color: #c62828; }
+.pip.current { background: #3949ab; border-color: #3949ab; }
+.summary {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+.summary h2 { font-size: 22px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 0.5rem; }
+.summary p { font-size: 15px; color: var(--color-text-secondary); margin-bottom: 1.5rem; }
+.big-score { font-size: 48px; font-weight: 500; color: #9fa8da; margin: 1rem 0; }
+.missed-list { text-align: left; margin: 1rem 0 1.5rem; }
+.missed-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 8px 0;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+  color: var(--color-text-secondary);
+}
+.missed-kw { font-family: var(--font-mono); color: #ef9a9a; font-weight: 500; }
+.hint-btn {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+.hint-btn:hover { color: var(--color-text-primary); }
+.hint-text {
+  font-size: 13px;
+  color: #9fa8da;
+  margin-top: 0.5rem;
+  font-family: var(--font-mono);
+  display: none;
+}
+</style>
+
+<div id="app">
+  <h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;">Java keyword quiz — type the keyword that matches each description</h2>
+  <div class="header">
+    <span class="title">Java keyword quiz</span>
+    <div class="score-bar">
+      <span>correct: <span class="score-val" id="sc-correct">0</span></span>
+      <span>wrong: <span class="score-val" id="sc-wrong">0</span></span>
+    </div>
+  </div>
+  <div id="quiz-area"></div>
+</div>
+
+<script>
+const QUESTIONS = [
+  { kw: "public", cat: "Access modifiers", prompt: "Makes a class, method, or variable accessible from anywhere — other classes, other packages.", example: "___ class Dog { ... }" },
+  { kw: "private", cat: "Access modifiers", prompt: "Restricts a method or variable so only the class it belongs to can use it. Nothing outside can touch it.", example: "___ int age;" },
+  { kw: "protected", cat: "Access modifiers", prompt: "Allows access within the same package AND by subclasses that extend the class — but not random outside classes.", example: "___ String name;" },
+  { kw: "static", cat: "Class & objects", prompt: "Means the method or variable belongs to the CLASS itself, not to any specific object. You can call it without making a new instance.", example: "public ___ void main(String[] args)" },
+  { kw: "void", cat: "Return types", prompt: "Used as a return type to mean 'this method doesn't return anything at all'.", example: "public ___ printName() { ... }" },
+  { kw: "new", cat: "Class & objects", prompt: "Creates a fresh object (instance) from a class. Calls the constructor.", example: "Scanner sc = ___ Scanner(System.in);" },
+  { kw: "this", cat: "Class & objects", prompt: "Refers to the current object inside a method or constructor — useful when a parameter name shadows an instance variable.", example: "___.name = name;" },
+  { kw: "class", cat: "Structure", prompt: "Declares a new class — the blueprint for objects.", example: "___ Cat { String name; }" },
+  { kw: "extends", cat: "Inheritance", prompt: "Used to inherit from another class. The new class gets all the parent's non-private methods and fields.", example: "class Dog ___ Animal { ... }" },
+  { kw: "super", cat: "Inheritance", prompt: "Calls the parent class's constructor or methods from inside a subclass.", example: "___.speak(); or ___(name);" },
+  { kw: "return", cat: "Methods", prompt: "Exits a method and optionally sends a value back to the caller.", example: "___ x * 2;" },
+  { kw: "if", cat: "Control flow", prompt: "Runs a block of code only when a condition is true.", example: "___ (score > 90) { ... }" },
+  { kw: "else", cat: "Control flow", prompt: "The fallback block that runs when the if-condition was false.", example: "___ { System.out.println(\"nope\"); }" },
+  { kw: "for", cat: "Loops", prompt: "A loop with an initializer, condition, and update — all in one line. Great when you know how many times to repeat.", example: "___ (int i = 0; i < 5; i++)" },
+  { kw: "while", cat: "Loops", prompt: "A loop that keeps running as long as a condition is true. Checks before each iteration.", example: "___ (x > 0) { x--; }" },
+  { kw: "break", cat: "Loops", prompt: "Immediately exits the nearest loop or switch statement.", example: "___ ; // jumps out of the loop" },
+  { kw: "continue", cat: "Loops", prompt: "Skips the rest of the current loop iteration and jumps to the next one.", example: "___ ; // skip to next iteration" },
+  { kw: "switch", cat: "Control flow", prompt: "Compares a variable against a list of values and runs the matching block.", example: "___ (day) { case 1: ... }" },
+  { kw: "case", cat: "Control flow", prompt: "A branch inside a switch statement. Runs when the switch value matches.", example: "___ 2: System.out.println(\"Tuesday\");" },
+  { kw: "final", cat: "Modifiers", prompt: "Makes a variable constant (can't be reassigned), or prevents a method from being overridden / a class from being extended.", example: "___ int MAX = 100;" },
+  { kw: "int", cat: "Primitives", prompt: "A primitive data type for whole numbers (no decimals). Range: ~-2 billion to 2 billion.", example: "___ count = 0;" },
+  { kw: "double", cat: "Primitives", prompt: "A primitive for decimal (floating-point) numbers. More precise than float.", example: "___ price = 9.99;" },
+  { kw: "boolean", cat: "Primitives", prompt: "A primitive that can only be true or false.", example: "___ isReady = true;" },
+  { kw: "String", cat: "Common classes", prompt: "Not a primitive — it's a class representing a sequence of characters. Text, basically.", example: "___ greeting = \"Hello\";" },
+  { kw: "null", cat: "Values", prompt: "Represents the absence of an object — a reference that points to nothing.", example: "String s = ___;" },
+  { kw: "true", cat: "Values", prompt: "One of the two boolean literals — the affirmative one.", example: "boolean on = ___;" },
+  { kw: "false", cat: "Values", prompt: "The other boolean literal — the negative one.", example: "boolean off = ___;" },
+  { kw: "import", cat: "Structure", prompt: "Brings a class from another package into scope so you can use it without the full package path.", example: "___ java.util.Scanner;" },
+  { kw: "interface", cat: "OOP", prompt: "Defines a contract — a set of method signatures a class must implement if it uses this.", example: "___ Runnable { void run(); }" },
+  { kw: "implements", cat: "OOP", prompt: "Used when a class agrees to fulfill the contract of an interface.", example: "class Dog ___ Animal { ... }" },
+];
+
+let questions = [], idx = 0, correct = 0, wrong = 0, missed = [], results = [];
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function startQuiz() {
+  questions = shuffle([...QUESTIONS]);
+  idx = 0; correct = 0; wrong = 0; missed = []; results = [];
+  updateScore();
+  renderQuestion();
+}
+
+function updateScore() {
+  document.getElementById('sc-correct').textContent = correct;
+  document.getElementById('sc-wrong').textContent = wrong;
+}
+
+function renderPips() {
+  return questions.map((_, i) => {
+    let cls = 'pip';
+    if (i < idx) cls += results[i] ? ' done-correct' : ' done-wrong';
+    else if (i === idx) cls += ' current';
+    return `<div class="${cls}"></div>`;
+  }).join('');
+}
+
+function renderQuestion() {
+  if (idx >= questions.length) { renderSummary(); return; }
+  const q = questions[idx];
+  document.getElementById('quiz-area').innerHTML = `
+    <div class="progress-row">${renderPips()}</div>
+    <div class="card">
+      <div class="category-badge">${q.cat}</div>
+      <p class="prompt">${q.prompt}</p>
+      <div class="example">${q.example}</div>
+      <div class="input-row">
+        <input id="answer" type="text" placeholder="type the keyword..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+        <button class="btn btn-primary" onclick="checkAnswer()">Check</button>
+      </div>
+      <button class="hint-btn" onclick="toggleHint()">show hint</button>
+      <div class="hint-text" id="hint-text">Starts with: <strong>${q.kw[0]}</strong> — ${q.kw.length} letter${q.kw.length > 1 ? 's' : ''}</div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+  `;
+  const inp = document.getElementById('answer');
+  inp.focus();
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') checkAnswer(); });
+}
+
+function toggleHint() {
+  const h = document.getElementById('hint-text');
+  h.style.display = h.style.display === 'block' ? 'none' : 'block';
+}
+
+function checkAnswer() {
+  const inp = document.getElementById('answer');
+  const val = inp.value.trim();
+  if (!val) return;
+  const q = questions[idx];
+  const fb = document.getElementById('feedback');
+  const isCorrect = val === q.kw;
+
+  inp.disabled = true;
+  document.querySelector('.btn-primary').disabled = true;
+
+  if (isCorrect) {
+    inp.classList.add('correct');
+    fb.className = 'feedback correct';
+    fb.innerHTML = '✓ Correct!';
+    correct++;
+    results.push(true);
+  } else {
+    inp.classList.add('wrong');
+    fb.className = 'feedback wrong';
+    fb.innerHTML = `✗ Not quite. The answer is <span class="correct-ans">${q.kw}</span>`;
+    wrong++;
+    results.push(false);
+    missed.push(q);
+  }
+
+  updateScore();
+  setTimeout(() => { idx++; renderQuestion(); }, 1400);
+}
+
+function renderSummary() {
+  const pct = Math.round((correct / questions.length) * 100);
+  let msg = pct === 100 ? 'Perfect score! You know your keywords.' :
+            pct >= 80 ? 'Great job — almost there!' :
+            pct >= 60 ? 'Decent run — keep practicing!' : 'Keep at it — repetition is the key!';
+
+  let missedHTML = '';
+  if (missed.length) {
+    missedHTML = `<div class="missed-list">
+      <p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:8px;">Keywords to review:</p>
+      ${missed.map(q => `<div class="missed-item"><span style="color:var(--color-text-secondary);flex:1">${q.prompt.substring(0,50)}…</span><span class="missed-kw">${q.kw}</span></div>`).join('')}
+    </div>`;
+  }
+
+  document.getElementById('quiz-area').innerHTML = `
+    <div class="card summary">
+      <div class="big-score">${pct}%</div>
+      <h2>${msg}</h2>
+      <p>${correct} / ${questions.length} correct</p>
+      ${missedHTML}
+      <button class="btn btn-primary" onclick="startQuiz()" style="margin-top:0.5rem">Play again ↻</button>
+    </div>
+  `;
+}
+
+startQuiz();
+</script>

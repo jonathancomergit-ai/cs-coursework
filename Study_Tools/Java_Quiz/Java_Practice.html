@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java Quiz</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#080810;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#e2e8f0}
+:root{
+  --bg:#080810;--surface:#10101e;--surface2:#18182e;--surface3:#20203a;
+  --border:#2a2a4a;--border2:#3a3a5a;
+  --accent:#7c6fff;--accent2:#a78bfa;--accent-dim:#1e1a40;
+  --green:#22c55e;--green-bg:#0a2018;--green-border:#155230;
+  --red:#f87171;--red-bg:#200a0a;--red-border:#5a1a1a;
+  --amber:#f59e0b;--amber-bg:#1a1200;--amber-border:#4a3200;
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#525270;
+  --mono:'Courier New',Courier,monospace;
+}
+#app{max-width:780px;margin:0 auto;padding:2rem 1.25rem}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;padding-bottom:1.25rem;border-bottom:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:36px;height:36px;background:var(--accent-dim);border-radius:10px;display:flex;align-items:center;justify-content:center;border:1px solid var(--accent)}
+.logo-icon svg{width:18px;height:18px;stroke:var(--accent2);fill:none;stroke-width:2}
+.logo-text{font-size:18px;font-weight:600;color:var(--text)}
+.score-chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500;border:1px solid var(--border)}
+.chip.c-ok{border-color:var(--green-border);background:var(--green-bg);color:var(--green)}
+.chip.c-bad{border-color:var(--red-border);background:var(--red-bg);color:var(--red)}
+.chip.c-streak{border-color:#4a3200;background:#1a1200;color:var(--amber)}
+.chip.c-flag{border-color:#2a2a4a;background:#18182e;color:#94a3b8}
+.section-label{font-size:11px;font-weight:600;letter-spacing:0.12em;color:var(--text3);margin:0 0 0.7rem;text-transform:uppercase}
+.mode-row{display:flex;gap:6px;margin-bottom:1.75rem;flex-wrap:wrap}
+.mode-btn{padding:9px 18px;font-size:13px;font-weight:500;border:1px solid var(--border2);border-radius:10px;background:var(--surface);color:var(--text2);cursor:pointer;transition:all 0.15s}
+.mode-btn:hover{border-color:var(--accent);color:var(--accent2);background:var(--surface2)}
+.mode-btn.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent2)}
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:8px;margin-bottom:1.75rem}
+.cat-tile{padding:14px 16px;border-radius:12px;border:1px solid var(--border);cursor:pointer;transition:all 0.15s;background:var(--surface);position:relative;overflow:hidden}
+.cat-tile::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:transparent;transition:background 0.15s}
+.cat-tile:hover{border-color:var(--border2);background:var(--surface2)}
+.cat-tile:hover::before{background:var(--accent)}
+.cat-tile.selected{border-color:var(--accent);background:var(--accent-dim)}
+.cat-tile.selected::before{background:var(--accent2)}
+.cat-icon{font-size:18px;margin-bottom:6px;display:block}
+.cat-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
+.cat-tile.selected .cat-name{color:var(--accent2)}
+.cat-q{font-size:11px;color:var(--text3)}
+.cat-tile.selected .cat-q{color:#6366f1}
+.action-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{padding:10px 20px;font-size:13px;font-weight:500;border:1px solid var(--border2);border-radius:10px;background:var(--surface);color:var(--text2);cursor:pointer;transition:all 0.15s}
+.btn:hover{border-color:var(--accent);color:var(--accent2)}
+.btn:disabled{opacity:0.3;cursor:not-allowed}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-primary:hover:not(:disabled){background:#6d5dfc;border-color:#6d5dfc}
+.btn-amber{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber)}
+.btn-amber:hover{background:#2a1e00;border-color:var(--amber);color:var(--amber)}
+.btn-sm{padding:7px 14px;font-size:12px}
+.total-badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;background:rgba(255,255,255,0.1);color:#c4b5fd;margin-left:7px}
+.pips{display:flex;gap:3px;margin-bottom:1.4rem;flex-wrap:wrap}
+.pip{height:4px;min-width:4px;flex:1;border-radius:2px;background:var(--surface3)}
+.pip.pc{background:var(--green)}
+.pip.pw{background:var(--red)}
+.pip.pa{background:var(--accent)}
+.pip.pf{background:var(--amber)}
+.q-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:1.6rem;margin-bottom:1rem}
+.q-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.1rem;gap:8px}
+.q-header-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cat-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;padding:4px 10px;border-radius:20px;background:var(--accent-dim);color:var(--accent2);border:1px solid rgba(124,111,255,0.25)}
+.cat-badge .dot{width:5px;height:5px;border-radius:50%;background:var(--accent2)}
+.type-badge{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;border:1px solid}
+.type-badge.t-keyword{background:#0a1520;border-color:#1e4a7a;color:#60a5fa}
+.type-badge.t-snippet{background:#0a1a10;border-color:#1a5a2a;color:#4ade80}
+.type-badge.t-reverse{background:#1a0a2a;border-color:#5a2a8a;color:#c084fc}
+.type-badge.t-output{background:#1a1000;border-color:#6a4000;color:#fbbf24}
+.q-num{font-size:12px;color:var(--text3);white-space:nowrap}
+.prompt{font-size:15px;color:var(--text);line-height:1.7;margin-bottom:1.1rem}
+.code-block{font-family:var(--mono);font-size:13px;color:#94a3b8;background:var(--surface2);border-radius:10px;padding:1rem 1.1rem;margin-bottom:1.1rem;border-left:3px solid var(--accent);white-space:pre;overflow-x:auto;line-height:1.7}
+.code-block .blank{background:#2a2060;color:#a78bfa;border-radius:4px;padding:1px 8px;border:1px solid #4a40a0;font-weight:600}
+.example{font-family:var(--mono);font-size:13px;color:#94a3b8;background:var(--surface2);border-radius:10px;padding:0.8rem 1rem;margin-bottom:1.1rem;border-left:3px solid var(--accent)}
+#ans{width:100%;padding:13px 15px;font-size:15px;font-family:var(--mono);background:var(--surface2);border:1px solid var(--border2);border-radius:10px;color:var(--text);outline:none;transition:border 0.15s;margin-bottom:8px}
+#ans:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,111,255,0.15)}
+#ans.ok{border-color:var(--green);background:var(--green-bg)}
+#ans.bad{border-color:var(--red);background:var(--red-bg)}
+.input-row{display:flex;gap:8px;margin-bottom:8px}
+.input-row #ans{margin-bottom:0}
+.fb{margin-top:1rem;padding:0.8rem 1rem;border-radius:10px;font-size:13px;display:none;align-items:center;gap:8px;line-height:1.5}
+.fb.ok{display:flex;background:var(--green-bg);border:1px solid var(--green-border);color:var(--green)}
+.fb.bad{display:flex;background:var(--red-bg);border:1px solid var(--red-border);color:var(--red)}
+.fb-icon{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700}
+.fb.ok .fb-icon{background:var(--green-border);color:var(--green)}
+.fb.bad .fb-icon{background:var(--red-border);color:var(--red)}
+.fb .ca{font-family:var(--mono);font-weight:600;color:#86efac}
+.hint-row{display:flex;align-items:center;gap:10px;margin-top:6px}
+.hint-btn{font-size:12px;color:var(--text3);background:none;border:none;cursor:pointer;padding:0;text-decoration:underline}
+.hint-btn:hover{color:var(--text2)}
+.hint-text{font-size:12px;color:var(--accent2);font-family:var(--mono);display:none}
+.mc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:1rem}
+.mc-btn{padding:15px 16px;font-size:14px;font-family:var(--mono);text-align:left;border:1px solid var(--border2);border-radius:12px;background:var(--surface2);color:var(--text);cursor:pointer;transition:all 0.15s;font-weight:600}
+.mc-btn.desc{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;font-weight:400;padding:14px 16px;text-align:left;line-height:1.5}
+.mc-btn:hover:not(:disabled){border-color:var(--accent);background:var(--accent-dim);color:var(--accent2)}
+.mc-btn.mc-ok{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+.mc-btn.mc-bad{background:var(--red-bg);border-color:var(--red);color:var(--red)}
+.q-actions{display:flex;gap:8px;margin-top:1rem;flex-wrap:wrap}
+.flag-btn{padding:8px 14px;font-size:12px;font-weight:500;border:1px solid var(--amber-border);border-radius:8px;background:var(--amber-bg);color:var(--amber);cursor:pointer;transition:all 0.15s}
+.flag-btn:hover{background:#2a1e00}
+.flag-btn.flagged{background:#2a1e00;border-color:var(--amber);color:var(--amber)}
+.summary{text-align:center;padding:1.5rem 0.5rem}
+.score-ring{width:110px;height:110px;margin:0 auto 1.25rem;position:relative}
+.score-ring svg{width:100%;height:100%}
+.score-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:var(--text)}
+.summary-msg{font-size:19px;font-weight:600;color:var(--text);margin-bottom:4px}
+.summary-sub{font-size:13px;color:var(--text2);margin-bottom:1.5rem}
+.stat-row{display:flex;gap:8px;justify-content:center;margin-bottom:1.5rem;flex-wrap:wrap}
+.stat{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 18px;text-align:center}
+.stat-val{font-size:20px;font-weight:700;color:var(--text)}
+.stat-lbl{font-size:11px;color:var(--text3);margin-top:2px}
+.missed-section{text-align:left;margin:0 0 1.5rem}
+.missed-label{font-size:11px;font-weight:600;letter-spacing:0.1em;color:var(--text3);margin-bottom:8px;text-transform:uppercase}
+.mi{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);gap:10px}
+.mi-text{font-size:12px;color:var(--text2);flex:1}
+.mi-kw{font-family:var(--mono);font-size:12px;color:var(--red);font-weight:600;white-space:nowrap;background:var(--red-bg);padding:2px 8px;border-radius:5px;border:1px solid var(--red-border)}
+.sr-info{font-size:12px;color:var(--text3);margin-bottom:1.5rem;padding:10px 14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border);line-height:1.6}
+.flagged-section{margin-bottom:1.5rem}
+.fl-item{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);gap:10px}
+.fl-kw{font-family:var(--mono);font-size:13px;color:var(--amber);font-weight:600}
+.fl-cat{font-size:11px;color:var(--text3)}
+@media(max-width:520px){
+  #app{padding:1.1rem 0.8rem}
+  .mc-grid{grid-template-columns:1fr}
+  .cat-grid{grid-template-columns:1fr 1fr}
+  .score-chips{gap:4px}
+  .chip{font-size:11px;padding:4px 9px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-icon"><svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+      <span class="logo-text">Java quiz</span>
+    </div>
+    <button id="leave-btn" onclick="leaveQuiz()" style="display:none;padding:7px 16px;font-size:12px;font-weight:500;border:1px solid var(--red-border);border-radius:8px;background:var(--red-bg);color:var(--red);cursor:pointer">Leave quiz</button>
+    <div style="display:none" id="leave-spacer"></div>
+    <div class="score-chips">
+      <div class="chip c-ok" id="sc">0 correct</div>
+      <div class="chip c-bad" id="sw">0 wrong</div>
+      <div class="chip c-streak" id="ss">0 streak</div>
+      <div class="chip c-flag" id="sf">0 flagged</div>
+    </div>
+  </div>
+  <div id="main"></div>
+</div>
+<script>
+const ICONS={'Access modifiers':'🔒','Primitives':'#','Class & objects':'{}','Inheritance & OOP':'↑','Control flow':'⟶','Loops':'↻','Modifiers':'★','Exception handling':'⚠','Code structure':'≡','Operators & values':'±','String methods':'Aa','Collections':'[]','Casting':'( )','Common errors':'💥','Output prediction':'▶'};
+const DIFF={'Access modifiers':{label:'Beginner',stars:1},'Primitives':{label:'Beginner',stars:1},'Operators & values':{label:'Beginner',stars:1},'Control flow':{label:'Beginner',stars:1},'Loops':{label:'Beginner',stars:1},'Code structure':{label:'Easy',stars:2},'Class & objects':{label:'Easy',stars:2},'String methods':{label:'Easy',stars:2},'Modifiers':{label:'Intermediate',stars:3},'Exception handling':{label:'Intermediate',stars:3},'Collections':{label:'Intermediate',stars:3},'Casting':{label:'Intermediate',stars:3},'Inheritance & OOP':{label:'Advanced',stars:4},'Common errors':{label:'Advanced',stars:4},'Output prediction':{label:'Advanced',stars:4}};
+function diffStars(c){const d=DIFF[c]||{stars:2,label:'Easy'};const colors=['','#22c55e','#60a5fa','#f59e0b','#f87171'];const col=colors[d.stars]||'#888';return `<span style="color:${col};font-size:11px;letter-spacing:1px">${'●'.repeat(d.stars)}${'○'.repeat(4-d.stars)}</span><span style="font-size:10px;color:${col};margin-left:4px;font-weight:500">${d.label}</span>`;}
+
+
+const CATS={
+'Access modifiers':{questions:[
+{kw:'public',prompt:'Makes a class, method, or variable accessible from anywhere.',example:'___ class Dog { ... }'},
+{kw:'private',prompt:'Restricts a field or method so only its own class can use it.',example:'___ int age;'},
+{kw:'protected',prompt:'Allows access within the same package and by subclasses.',example:'___ String name;'},
+]},
+'Primitives':{questions:[
+{kw:'int',prompt:'Whole number type. No decimals. Range roughly -2 billion to +2 billion.',example:'___ count = 0;'},
+{kw:'double',prompt:'Decimal floating-point number. More precise than float.',example:'___ price = 9.99;'},
+{kw:'float',prompt:'Decimal number, less precise than double. Append f to the literal.',example:'___ temp = 98.6f;'},
+{kw:'boolean',prompt:'Can only be true or false.',example:'___ isReady = true;'},
+{kw:'char',prompt:'Holds a single character. Uses single quotes.',example:"___ grade = 'A';"},
+{kw:'long',prompt:'Like int but much larger range. Append L to the literal.',example:'___ pop = 8000000000L;'},
+{kw:'byte',prompt:'Tiny integer, only -128 to 127.',example:'___ b = 100;'},
+{kw:'short',prompt:'Integer smaller than int, range -32768 to 32767.',example:'___ s = 200;'},
+]},
+'Class & objects':{questions:[
+{kw:'class',prompt:'Declares a new class — the blueprint for creating objects.',example:'___ Cat { String name; }'},
+{kw:'new',prompt:'Creates a fresh object (instance) from a class.',example:'Dog d = ___ Dog();'},
+{kw:'this',prompt:'Refers to the current object inside its own method or constructor.',example:'___.name = name;'},
+{kw:'null',prompt:'Represents a reference that points to no object at all.',example:'String s = ___;'},
+{kw:'instanceof',prompt:'Tests whether an object is an instance of a specific class.',example:'if (obj ___ Dog) { ... }'},
+]},
+'Inheritance & OOP':{questions:[
+{kw:'extends',prompt:'Inherits from another class — child gets parent\'s non-private members.',example:'class Dog ___ Animal { }'},
+{kw:'super',prompt:'Calls the parent class constructor or methods from a subclass.',example:'___(name);'},
+{kw:'abstract',prompt:'Marks a class or method as incomplete — subclasses must implement it.',example:'___ class Shape { }'},
+{kw:'interface',prompt:'Defines a contract — a list of method signatures a class must implement.',example:'___ Flyable { void fly(); }'},
+{kw:'implements',prompt:'Used when a class agrees to fulfill all methods of an interface.',example:'class Bird ___ Flyable { }'},
+]},
+'Control flow':{questions:[
+{kw:'if',prompt:'Runs a block only when the condition is true.',example:'___ (score > 90) { ... }'},
+{kw:'else',prompt:'The fallback block that runs when the if-condition was false.',example:'___ { System.out.println("nope"); }'},
+{kw:'switch',prompt:'Compares a value against a series of cases and runs the match.',example:'___ (day) { case 1: ... }'},
+{kw:'case',prompt:'A branch inside a switch. Runs when the switch value matches.',example:'___ 2: System.out.println("Tue");'},
+{kw:'default',prompt:'Catch-all branch in a switch — runs when no case matches.',example:'___ : System.out.println("unknown");'},
+{kw:'break',prompt:'Immediately exits the nearest loop or switch.',example:'___ ;'},
+{kw:'continue',prompt:'Skips the rest of the current iteration and jumps to the next.',example:'___ ;'},
+{kw:'return',prompt:'Exits the method and optionally sends a value back to the caller.',example:'___ x * 2;'},
+]},
+'Loops':{questions:[
+{kw:'for',prompt:'Loop with init, condition, and update in one line. Best when you know the count.',example:'___ (int i = 0; i < 5; i++) { }'},
+{kw:'while',prompt:'Loops as long as condition is true. Checks before each run.',example:'___ (x > 0) { x--; }'},
+{kw:'do',prompt:'Like while but always runs at least once — checks condition after.',example:'___ { x++; } while (x < 5);'},
+]},
+'Modifiers':{questions:[
+{kw:'static',prompt:'Belongs to the class, not any instance. Call without creating an object.',example:'public ___ void main(String[] args)'},
+{kw:'final',prompt:'Makes a variable constant, prevents method override, or locks a class from being extended.',example:'___ int MAX = 100;'},
+{kw:'void',prompt:'Return type meaning this method returns nothing.',example:'public ___ printName() { }'},
+{kw:'synchronized',prompt:'Only one thread can run this method at a time.',example:'public ___ void deposit() { }'},
+{kw:'volatile',prompt:'Variable may change across threads — always read from main memory.',example:'___ boolean running = true;'},
+]},
+'Exception handling':{questions:[
+{kw:'try',prompt:'Wraps code that might throw an exception.',example:'___ { int x = 1/0; }'},
+{kw:'catch',prompt:'Handles a specific exception thrown in a try block.',example:'___ (ArithmeticException e) { }'},
+{kw:'finally',prompt:'Always runs after try/catch — used to close resources.',example:'___ { file.close(); }'},
+{kw:'throw',prompt:'Manually fires an exception from your code.',example:'___ new IllegalArgumentException("bad");'},
+{kw:'throws',prompt:'Declares a method might throw a checked exception.',example:'void readFile() ___ IOException { }'},
+]},
+'Code structure':{questions:[
+{kw:'import',prompt:'Brings a class from another package into scope.',example:'___ java.util.Scanner;'},
+{kw:'package',prompt:'Declares which package this file belongs to. Goes at the top.',example:'___ com.myapp.utils;'},
+{kw:'String',prompt:'Class representing a sequence of characters. Most used type.',example:'___ greeting = "Hello";'},
+{kw:'Scanner',prompt:'Class from java.util used to read console input.',example:'___ sc = new Scanner(System.in);'},
+{kw:'ArrayList',prompt:'Resizable array from java.util. Grows and shrinks dynamically.',example:'___ <String> list = new ArrayList<>();'},
+{kw:'var',prompt:'Local variable type inference — Java figures out the type for you.',example:'___ name = "Alice";'},
+]},
+'Operators & values':{questions:[
+{kw:'true',prompt:'Boolean literal — the affirmative value.',example:'boolean on = ___;'},
+{kw:'false',prompt:'Boolean literal — the negative value.',example:'boolean off = ___;'},
+{kw:'&&',prompt:'Logical AND — both sides must be true.',example:'if (a > 0 ___ b > 0)'},
+{kw:'||',prompt:'Logical OR — at least one side must be true.',example:'if (a == 0 ___ b == 0)'},
+{kw:'!',prompt:'Logical NOT — flips true to false and vice versa.',example:'if (___ isReady)'},
+{kw:'==',prompt:'Equality check. Compares values for primitives, references for objects.',example:'if (x ___ 5)'},
+{kw:'!=',prompt:'Not-equal — true if the two sides differ.',example:'if (name ___ null)'},
+]},
+'String methods':{questions:[
+{kw:'.length()',prompt:'Returns the number of characters in a String.',example:'str___()',},
+{kw:'.toUpperCase()',prompt:'Returns a new String with all characters converted to uppercase.',example:'str___()',},
+{kw:'.toLowerCase()',prompt:'Returns a new String with all characters converted to lowercase.',example:'str___()',},
+{kw:'.charAt(i)',prompt:'Returns the single character at position i (zero-indexed).',example:'str___(0)',},
+{kw:'.substring(a,b)',prompt:'Returns a portion of the String from index a up to (not including) b.',example:'str___(1, 4)',},
+{kw:'.equals()',prompt:'Compares two Strings by content — use this instead of == for Strings.',example:'str1___(str2)',},
+{kw:'.contains()',prompt:'Returns true if the String contains the specified sequence of characters.',example:'str___("hello")',},
+{kw:'.replace(a,b)',prompt:'Returns a new String with all occurrences of a replaced by b.',example:'str___("o","0")',},
+{kw:'.trim()',prompt:'Returns a new String with leading and trailing whitespace removed.',example:'str___()',},
+{kw:'.split()',prompt:'Splits the String around a delimiter and returns a String array.',example:'str___(" ")',},
+{kw:'.indexOf()',prompt:'Returns the index of the first occurrence of a character or substring, or -1 if not found.',example:'str___("e")',},
+{kw:'.isEmpty()',prompt:'Returns true if the String has zero characters.',example:'str___()',},
+]},
+'Collections':{questions:[
+{kw:'ArrayList',prompt:'Resizable array. Fast random access by index. Slow inserts/deletes in the middle.',example:'___ <String> list = new ArrayList<>();'},
+{kw:'LinkedList',prompt:'Doubly linked list. Fast inserts/deletes at ends. Slow random access.',example:'___ <String> list = new LinkedList<>();'},
+{kw:'HashMap',prompt:'Stores key-value pairs. Keys are unique. Fast lookup by key.',example:'___ <String,Integer> map = new HashMap<>();'},
+{kw:'HashSet',prompt:'Stores unique values only. No duplicates allowed. No guaranteed order.',example:'___ <String> set = new HashSet<>();'},
+{kw:'.add()',prompt:'Adds an element to a List or Set collection.',example:'list___(item);'},
+{kw:'.get(i)',prompt:'Retrieves the element at a specific index from a List.',example:'list___(0);'},
+{kw:'.remove()',prompt:'Removes an element from a collection by index or value.',example:'list___(0);'},
+{kw:'.size()',prompt:'Returns the number of elements currently in a collection.',example:'list___();'},
+{kw:'.put(k,v)',prompt:'Adds or updates a key-value pair in a Map.',example:'map___("age", 25);'},
+{kw:'.containsKey()',prompt:'Returns true if a Map contains the specified key.',example:'map___("name");'},
+]},
+'Casting':{questions:[
+{kw:'(int)',prompt:'Cast a double or float down to a whole number — truncates (does not round) the decimal.',example:'int x = ___ 9.9;  // x is 9'},
+{kw:'(double)',prompt:'Cast an int up to a decimal type so division gives a fractional result.',example:'double d = ___ 5 / 2;'},
+{kw:'(String)',prompt:'You cannot cast to String with parentheses — you use String.valueOf() or concatenation instead. What is the correct cast syntax for int to double?',example:'double d = ___(myInt);'},
+{kw:'(char)',prompt:'Cast an int to its corresponding ASCII/Unicode character.',example:"char c = ___ 65;  // 'A'"},
+]},
+'Common errors':{questions:[
+{kw:'NullPointerException',prompt:'Thrown when you try to use a reference variable that points to null — like calling a method on it.',example:'String s = null; s.length(); // throws ___'},
+{kw:'ArrayIndexOutOfBoundsException',prompt:'Thrown when you try to access an array index that does not exist — negative or too large.',example:'int[] a = {1,2}; a[5]; // throws ___'},
+{kw:'StackOverflowError',prompt:'Thrown when a method calls itself (recursion) too many times with no base case and the call stack fills up.',example:'void go(){ go(); } // causes ___'},
+{kw:'ClassCastException',prompt:'Thrown when you try to cast an object to a type it is not actually an instance of.',example:'Object o = "hi"; (Integer) o; // throws ___'},
+{kw:'ArithmeticException',prompt:'Thrown for illegal math operations — most commonly dividing an integer by zero.',example:'int x = 5 / 0; // throws ___'},
+{kw:'NumberFormatException',prompt:'Thrown when you try to parse a String as a number but the String is not a valid number.',example:'Integer.parseInt("abc"); // throws ___'},
+]},
+};
+
+const SNIPPETS=[
+{cat:'Control flow',prompt:'Fill in the blank — this method checks if a number is positive.',code:`public static String check(int n) {\n    ___ (n > 0) {\n        return "positive";\n    } ___ {\n        return "not positive";\n    }\n}`,blanks:['if','else'],answer:'if,else'},
+{cat:'Loops',prompt:'Fill in the blank — this loop prints numbers 0 through 4.',code:`___ (int i = 0; i < 5; i++) {\n    System.out.println(i);\n}`,blanks:['for'],answer:'for'},
+{cat:'Exception handling',prompt:'Fill in the blank — safely divide two numbers.',code:`___ {\n    int result = a / b;\n    System.out.println(result);\n} ___ (ArithmeticException e) {\n    System.out.println("Cannot divide by zero");\n} ___ {\n    System.out.println("Done");\n}`,blanks:['try','catch','finally'],answer:'try,catch,finally'},
+{cat:'Class & objects',prompt:'Fill in the blank — a Dog class with a constructor.',code:`public ___ Dog {\n    private String name;\n\n    public Dog(String name) {\n        ___.name = name;\n    }\n\n    public String getName() {\n        ___ name;\n    }\n}`,blanks:['class','this','return'],answer:'class,this,return'},
+{cat:'Inheritance & OOP',prompt:'Fill in the blank — Animal base class and Dog subclass.',code:`public ___ class Animal {\n    public ___ void speak() { }\n}\n\npublic class Dog ___ Animal {\n    @Override\n    public void speak() {\n        System.out.println("Woof");\n    }\n}`,blanks:['abstract','abstract','extends'],answer:'abstract,abstract,extends'},
+{cat:'Modifiers',prompt:'Fill in the blank — a constants utility class.',code:`public class Config {\n    public ___ ___ int MAX_USERS = 100;\n    public ___ ___ String APP_NAME = "MyApp";\n}`,blanks:['static','final','static','final'],answer:'static,final,static,final'},
+{cat:'Collections',prompt:'Fill in the blank — build and use an ArrayList.',code:`___ <String> names = ___ ArrayList<>();\nnames.___(\"Alice\");\nnames.___(\"Bob\");\nSystem.out.println(names.___(0));`,blanks:['ArrayList','new','add','add','get'],answer:'ArrayList,new,add,add,get'},
+{cat:'Code structure',prompt:'Fill in the blank — read a number from the user.',code:`___ java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        ___ sc = ___ Scanner(System.in);\n        int n = sc.nextInt();\n        System.out.println(n);\n    }\n}`,blanks:['import','Scanner','new'],answer:'import,Scanner,new'},
+];
+
+const OUTPUT_QS=[
+{cat:'Output prediction',prompt:'What does this code print?',code:`int x = 5;\nint y = 2;\nSystem.out.println(x + y);\nSystem.out.println(x * y);\nSystem.out.println(x / y);`,answer:'7\n10\n2',choices:['7\n10\n2','7\n10\n2.5','5\n10\n2','7\n10\n2\n1'],explanation:'Integer division truncates — 5/2 is 2, not 2.5. To get 2.5 you\'d need doubles.'},
+{cat:'Output prediction',prompt:'What does this code print?',code:`String s = "Hello";\nSystem.out.println(s.length());\nSystem.out.println(s.charAt(1));\nSystem.out.println(s.toUpperCase());`,answer:'5\ne\nHELLO',choices:['5\ne\nHELLO','4\nH\nHELLO','5\nH\nhello','5\ne\nhello'],explanation:'length() is 5. charAt(1) is \'e\' (index 0 is H). toUpperCase() returns HELLO.'},
+{cat:'Output prediction',prompt:'What does this code print?',code:`for (int i = 0; i < 4; i++) {\n    if (i == 2) continue;\n    System.out.println(i);\n}`,answer:'0\n1\n3',choices:['0\n1\n2\n3','0\n1\n3','1\n2\n3','0\n1'],explanation:'continue skips the rest of the iteration when i==2, so 2 is never printed.'},
+{cat:'Output prediction',prompt:'What does this code print?',code:`int[] nums = {10, 20, 30};\nfor (int n : nums) {\n    System.out.print(n + " ");\n}`,answer:'10 20 30 ',choices:['10 20 30 ','10\n20\n30','[10, 20, 30]','10 20 30'],explanation:'print() does not add a newline. The space is appended after each number. The trailing space makes "10 20 30 ".'},
+{cat:'Output prediction',prompt:'What does this code print?',code:`boolean a = true;\nboolean b = false;\nSystem.out.println(a && b);\nSystem.out.println(a || b);\nSystem.out.println(!a);`,answer:'false\ntrue\nfalse',choices:['false\ntrue\nfalse','true\ntrue\nfalse','false\nfalse\ntrue','true\nfalse\ntrue'],explanation:'true && false = false. true || false = true. !true = false.'},
+{cat:'Output prediction',prompt:'What does this code print?',code:`String s1 = "Java";\nString s2 = "Java";\nSystem.out.println(s1 == s2);\nSystem.out.println(s1.equals(s2));`,answer:'true\ntrue',choices:['true\ntrue','false\ntrue','true\nfalse','false\nfalse'],explanation:'String literals are interned in Java — s1 and s2 point to the same object, so == is true here. equals() compares content, also true.'},
+{cat:'Output prediction',prompt:'What does this code print?',code:`int i = 0;\nwhile (i < 3) {\n    System.out.println(i);\n    i++;\n}\nSystem.out.println("done");`,answer:'0\n1\n2\ndone',choices:['0\n1\n2\ndone','1\n2\n3\ndone','0\n1\n2\n3\ndone','0\n1\ndone'],explanation:'i starts at 0, prints 0,1,2. When i reaches 3 the condition is false. Then "done" prints.'},
+{cat:'Output prediction',prompt:'What does this code print?',code:`try {\n    int x = 10 / 0;\n    System.out.println("ok");\n} catch (ArithmeticException e) {\n    System.out.println("caught");\n} finally {\n    System.out.println("done");\n}`,answer:'caught\ndone',choices:['caught\ndone','ok\ndone','caught','ok\ncaught\ndone'],explanation:'Division by zero throws ArithmeticException. "ok" never prints. catch runs, then finally always runs.'},
+];
+
+const REVERSE_QS=Object.keys(CATS).flatMap(cat=>
+  CATS[cat].questions.map(q=>({kw:q.kw,cat,prompt:q.prompt,example:q.example}))
+);
+
+let mode='type',selCats=new Set(Object.keys(CATS));
+let questions=[],idx=0,correct=0,wrong=0,streak=0,maxStreak=0,flagged=[],missed=[],results=[];
+let srScores={};
+try{const s=localStorage.getItem('java_quiz_sr');if(s)srScores=JSON.parse(s);}catch(e){}
+
+function saveSR(){try{localStorage.setItem('java_quiz_sr',JSON.stringify(srScores));}catch(e){}}
+
+function allQ(){
+  let base=[];
+  selCats.forEach(c=>{if(CATS[c])CATS[c].questions.forEach(q=>base.push({type:'keyword',kw:q.kw,cat:c,prompt:q.prompt,example:q.example}));});
+  let extra=[];
+  if(mode==='mixed'||mode==='snippet'){
+    SNIPPETS.filter(s=>selCats.has(s.cat)).forEach(s=>extra.push({type:'snippet',...s}));
+  }
+  if(mode==='mixed'||mode==='output'){
+    OUTPUT_QS.forEach(q=>extra.push({type:'output',...q}));
+  }
+  if(mode==='mixed'||mode==='reverse'){
+    REVERSE_QS.filter(q=>selCats.has(q.cat)).forEach(q=>extra.push({type:'reverse',...q}));
+  }
+  return [...base,...extra];
+}
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function srSort(qs){
+  return qs.sort((a,b)=>{
+    const sa=srScores[a.kw||a.prompt]||{score:0};
+    const sb=srScores[b.kw||b.prompt]||{score:0};
+    return sa.score-sb.score;
+  });
+}
+
+function showLeaveBtn(){document.getElementById('leave-btn').style.display='block';}
+function hideLeaveBtn(){document.getElementById('leave-btn').style.display='none';}
+function leaveQuiz(){
+  if(idx===0||confirm('Leave this quiz? Your progress will be lost.')){
+    hideLeaveBtn();renderMenu();
+  }
+}
+
+function startQuiz(){
+  const pool=allQ();if(!pool.length){renderMenu();return;}
+  const shuffled=shuffle(pool);
+  questions=srSort(shuffled);
+  idx=0;correct=0;wrong=0;streak=0;maxStreak=0;flagged=[];missed=[];results=[];
+  updateScore();showLeaveBtn();renderQuestion();
+}
+
+function updateScore(){
+  document.getElementById('sc').textContent=correct+' correct';
+  document.getElementById('sw').textContent=wrong+' wrong';
+  document.getElementById('ss').textContent=streak+' streak';
+  document.getElementById('sf').textContent=flagged.length+' flagged';
+}
+
+function renderMenu(){
+  hideLeaveBtn();
+  const total=allQ().length;
+  let html=`<div class="section-label">quiz mode</div>
+  <div class="mode-row">
+    <button class="mode-btn${mode==='type'?' active':''}" onclick="setMode('type')">Type answer</button>
+    <button class="mode-btn${mode==='mc'?' active':''}" onclick="setMode('mc')">Multiple choice</button>
+    <button class="mode-btn${mode==='reverse'?' active':''}" onclick="setMode('reverse')">Reverse mode</button>
+    <button class="mode-btn${mode==='snippet'?' active':''}" onclick="setMode('snippet')">Code snippets</button>
+    <button class="mode-btn${mode==='output'?' active':''}" onclick="setMode('output')">Output prediction</button>
+    <button class="mode-btn${mode==='mixed'?' active':''}" onclick="setMode('mixed')">Mixed (all)</button>
+  </div>`;
+  if(Object.keys(srScores).length>0){
+    const weak=Object.entries(srScores).filter(([,v])=>v.score<2).length;
+    html+=`<div class="sr-info">Spaced repetition is active — ${Object.keys(srScores).length} keywords tracked. ${weak} keyword${weak!==1?'s':''} flagged as weak and will appear more often.</div>`;
+  }
+  html+=`<div class="section-label">categories</div><div class="cat-grid">`;
+  const sortedCats=Object.keys(CATS).sort((a,b)=>(DIFF[a]?.stars||2)-(DIFF[b]?.stars||2));
+  sortedCats.forEach(c=>{
+    const sel=selCats.has(c),ic=ICONS[c]||'>';
+    html+=`<div class="cat-tile${sel?' selected':''}" onclick="toggleCat('${c}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <span class="cat-icon" style="font-size:18px;margin:0">${ic}</span>
+        <span>${diffStars(c)}</span>
+      </div>
+      <div class="cat-name">${c}</div>
+      <div class="cat-q">${CATS[c].questions.length} questions</div>
+    </div>`;
+  });
+  html+=`</div><div class="action-row">
+    <button class="btn btn-primary" onclick="startQuiz()" ${total===0?'disabled':''}>Start quiz<span class="total-badge">${total}</span></button>
+    <button class="btn btn-sm" onclick="selAll()">Select all</button>
+    <button class="btn btn-sm" onclick="selNone()">Clear</button>`;
+  if(flagged.length>0)html+=`<button class="btn btn-amber btn-sm" onclick="reviewFlagged()">Review flagged (${flagged.length})</button>`;
+  html+=`<button class="btn btn-sm" onclick="resetSR()">Reset SR data</button></div>`;
+  document.getElementById('main').innerHTML=html;
+}
+
+function setMode(m){mode=m;renderMenu();}
+function toggleCat(c){if(selCats.has(c))selCats.delete(c);else selCats.add(c);renderMenu();}
+function selAll(){selCats=new Set(Object.keys(CATS));renderMenu();}
+function selNone(){selCats=new Set();renderMenu();}
+function resetSR(){srScores={};saveSR();renderMenu();}
+
+function reviewFlagged(){
+  questions=shuffle([...flagged]);
+  idx=0;correct=0;wrong=0;streak=0;missed=[];results=[];
+  flagged=[];updateScore();showLeaveBtn();renderQuestion();
+}
+
+function pipHTML(){
+  return `<div class="pips">${questions.map((_,i)=>{
+    let cls='pip';
+    if(i<idx){if(flagged.some(f=>f===questions[i]))cls+=' pf';else cls+=results[i]?' pc':' pw';}
+    else if(i===idx)cls+=' pa';
+    return `<div class="${cls}"></div>`;
+  }).join('')}</div>`;
+}
+
+function typeBadge(type){
+  const map={keyword:'t-keyword',snippet:'t-snippet',reverse:'t-reverse',output:'t-output'};
+  const label={keyword:'keyword',snippet:'fill in blanks',reverse:'reverse mode',output:'output prediction'};
+  return `<span class="type-badge ${map[type]||'t-keyword'}">${label[type]||type}</span>`;
+}
+
+function renderQuestion(){
+  if(idx>=questions.length){renderSummary();return;}
+  const q=questions[idx];
+  if(q.type==='snippet')renderSnippet(q);
+  else if(q.type==='output')renderOutput(q);
+  else if(q.type==='reverse')renderReverse(q);
+  else renderKeyword(q);
+}
+
+function qHeader(q){
+  const isFlagged=flagged.includes(q);
+  return `${pipHTML()}
+  <div class="q-card">
+    <div class="q-header">
+      <div class="q-header-left">
+        <span class="cat-badge"><span class="dot"></span>${q.cat}</span>
+        ${typeBadge(q.type||'keyword')}
+      </div>
+      <span class="q-num">${idx+1} / ${questions.length}</span>
+    </div>`;
+}
+
+function renderKeyword(q){
+  if(mode==='mc'){
+    const pool=allQ();
+    const w=shuffle(pool.filter(x=>x.kw!==q.kw&&x.kw)).map(x=>x.kw).slice(0,3);
+    const opts=shuffle([q.kw,...w]);
+    const safe=q.kw.replace(/'/g,"\\'");
+    document.getElementById('main').innerHTML=qHeader(q)+`
+      <p class="prompt">${q.prompt}</p>
+      <div class="example">${q.example}</div>
+      <div class="mc-grid">
+        ${opts.map(o=>`<button class="mc-btn" onclick="checkMC('${o.replace(/'/g,"\\'")}','${safe}')">${o}</button>`).join('')}
+      </div>
+      <div class="q-actions"><button class="flag-btn" id="fbtn" onclick="flagQ()">Come back to this</button></div>
+      <div class="fb" id="fb"><span class="fb-icon"></span><span id="fb-msg"></span></div>
+    </div>`;
+  } else {
+    document.getElementById('main').innerHTML=qHeader(q)+`
+      <p class="prompt">${q.prompt}</p>
+      <div class="example">${q.example}</div>
+      <div class="input-row">
+        <input id="ans" type="text" placeholder="type the keyword..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+        <button class="btn btn-primary" id="chk" onclick="checkType()">Check</button>
+      </div>
+      <div class="q-actions">
+        <button class="flag-btn" id="fbtn" onclick="flagQ()">Come back to this</button>
+        <button class="hint-btn" onclick="toggleHint()" style="font-size:12px;color:var(--text3);background:none;border:none;cursor:pointer;text-decoration:underline">show hint</button>
+        <span class="hint-text" id="ht">Starts with <b>${q.kw[0]}</b> — ${q.kw.length} char${q.kw.length>1?'s':''}</span>
+      </div>
+      <div class="fb" id="fb"><span class="fb-icon"></span><span id="fb-msg"></span></div>
+    </div>`;
+    const inp=document.getElementById('ans');inp.focus();
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter')checkType();});
+  }
+}
+
+function renderReverse(q){
+  const pool=REVERSE_QS.filter(x=>x.kw!==q.kw);
+  const decoys=shuffle(pool).slice(0,3).map(x=>x.prompt);
+  const opts=shuffle([q.prompt,...decoys]);
+  const idx2=opts.indexOf(q.prompt);
+  document.getElementById('main').innerHTML=qHeader(q)+`
+    <p class="prompt">Which description matches <span style="font-family:var(--mono);color:var(--accent2);font-weight:700">${q.kw}</span>?</p>
+    <div class="mc-grid" style="grid-template-columns:1fr" id="mc-opts">
+      ${opts.map((o,i)=>`<button class="mc-btn desc" onclick="checkRevMC(${i},${idx2})">${o}</button>`).join('')}
+    </div>
+    <div class="q-actions"><button class="flag-btn" id="fbtn" onclick="flagQ()">Come back to this</button></div>
+    <div class="fb" id="fb"><span class="fb-icon"></span><span id="fb-msg"></span></div>
+  </div>`;
+}
+
+function renderSnippet(q){
+  const blankCount=q.blanks.length;
+  let codeHTML=q.code;
+  q.blanks.forEach((b,i)=>{codeHTML=codeHTML.replace('___',`<span class="blank">[${i+1}]</span>`);});
+  document.getElementById('main').innerHTML=qHeader(q)+`
+    <p class="prompt">${q.prompt}</p>
+    <div class="code-block">${codeHTML}</div>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:8px">Fill in all ${blankCount} blank${blankCount>1?'s':''} in order, separated by commas:</p>
+    <div class="input-row">
+      <input id="ans" type="text" placeholder="${q.blanks.map((_,i)=>`[${i+1}]`).join(', ')}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <button class="btn btn-primary" id="chk" onclick="checkSnippet()">Check</button>
+    </div>
+    <div class="q-actions"><button class="flag-btn" id="fbtn" onclick="flagQ()">Come back to this</button></div>
+    <div class="fb" id="fb"><span class="fb-icon"></span><span id="fb-msg"></span></div>
+  </div>`;
+  const inp=document.getElementById('ans');inp.focus();
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter')checkSnippet();});
+}
+
+function renderOutput(q){
+  document.getElementById('main').innerHTML=qHeader(q)+`
+    <p class="prompt">${q.prompt}</p>
+    <div class="code-block">${q.code}</div>
+    <div class="mc-grid" id="mc-opts">
+      ${q.choices.map(c=>`<button class="mc-btn" style="font-family:var(--mono);white-space:pre" onclick="checkOutput('${c.replace(/\n/g,'\\n').replace(/'/g,"\\'")}','${q.answer.replace(/\n/g,'\\n').replace(/'/g,"\\'")}','${(q.explanation||'').replace(/'/g,"\\'")}')">${c}</button>`).join('')}
+    </div>
+    <div class="q-actions"><button class="flag-btn" id="fbtn" onclick="flagQ()">Come back to this</button></div>
+    <div class="fb" id="fb"><span class="fb-icon"></span><span id="fb-msg"></span></div>
+  </div>`;
+}
+
+function toggleHint(){const h=document.getElementById('ht');h.style.display=h.style.display==='inline'?'none':'inline';}
+
+function flagQ(){
+  const q=questions[idx];
+  if(!flagged.includes(q)){flagged.push(q);}
+  const btn=document.getElementById('fbtn');
+  if(btn){btn.textContent='Flagged ★';btn.classList.add('flagged');}
+  updateScore();
+}
+
+function showFeedback(isOk,msg,extra){
+  const fb=document.getElementById('fb');
+  fb.className='fb '+(isOk?'ok':'bad');
+  fb.querySelector('.fb-icon').textContent=isOk?'✓':'✗';
+  document.getElementById('fb-msg').innerHTML=msg+(extra?`<br><span style="font-size:12px;opacity:0.8;margin-top:4px;display:block">${extra}</span>`:'');
+}
+
+function updateSR(key,isOk){
+  if(!srScores[key])srScores[key]={score:0,total:0};
+  srScores[key].total++;
+  if(isOk)srScores[key].score=Math.min(5,srScores[key].score+1);
+  else srScores[key].score=Math.max(0,srScores[key].score-1);
+  saveSR();
+}
+
+function recordResult(isOk,q){
+  if(isOk){correct++;streak++;maxStreak=Math.max(maxStreak,streak);}
+  else{wrong++;streak=0;missed.push(q);}
+  results.push(isOk);
+  updateSR(q.kw||q.prompt,isOk);
+  updateScore();
+}
+
+function checkType(){
+  const inp=document.getElementById('ans');
+  const val=inp.value.trim();if(!val)return;
+  const q=questions[idx];
+  const isOk=val===q.kw;
+  inp.disabled=true;document.getElementById('chk').disabled=true;
+  inp.className=isOk?'ok':'bad';
+  showFeedback(isOk,isOk?'Correct!':'Not quite — the answer is <span class="ca">'+q.kw+'</span>');
+  recordResult(isOk,q);
+  setTimeout(()=>{idx++;renderQuestion();},1700);
+}
+
+function checkMC(chosen,correct){
+  document.querySelectorAll('.mc-btn').forEach(b=>{
+    b.disabled=true;
+    if(b.textContent===correct)b.classList.add('mc-ok');
+    else if(b.textContent===chosen&&chosen!==correct)b.classList.add('mc-bad');
+  });
+  const q=questions[idx];const isOk=chosen===q.kw;
+  showFeedback(isOk,isOk?'Correct!':'Not quite — the answer is <span class="ca">'+q.kw+'</span>');
+  recordResult(isOk,q);
+  setTimeout(()=>{idx++;renderQuestion();},1700);
+}
+
+function checkRevMC(chosen,correct){
+  const btns=document.querySelectorAll('.mc-btn');
+  btns.forEach((b,i)=>{
+    b.disabled=true;
+    if(i===correct)b.classList.add('mc-ok');
+    else if(i===chosen&&chosen!==correct)b.classList.add('mc-bad');
+  });
+  const q=questions[idx];const isOk=chosen===correct;
+  showFeedback(isOk,isOk?'Correct!':'Wrong description selected.');
+  recordResult(isOk,q);
+  setTimeout(()=>{idx++;renderQuestion();},1700);
+}
+
+function checkSnippet(){
+  const inp=document.getElementById('ans');
+  const val=inp.value.trim();if(!val)return;
+  const q=questions[idx];
+  const got=val.split(',').map(s=>s.trim());
+  const exp=q.answer.split(',');
+  const isOk=got.length===exp.length&&got.every((v,i)=>v===exp[i]);
+  inp.disabled=true;document.getElementById('chk').disabled=true;
+  inp.className=isOk?'ok':'bad';
+  showFeedback(isOk,isOk?'Correct!':'Not quite — expected: <span class="ca">'+q.answer+'</span>');
+  recordResult(isOk,q);
+  setTimeout(()=>{idx++;renderQuestion();},2000);
+}
+
+function checkOutput(chosen,correct,explanation){
+  const chosend=chosen.replace(/\\n/g,'\n');
+  const correctd=correct.replace(/\\n/g,'\n');
+  const expld=explanation.replace(/\\n/g,'\n');
+  document.querySelectorAll('.mc-btn').forEach(b=>{
+    b.disabled=true;
+    const bt=b.textContent;
+    if(bt===correctd)b.classList.add('mc-ok');
+    else if(bt===chosend&&chosend!==correctd)b.classList.add('mc-bad');
+  });
+  const q=questions[idx];const isOk=chosend===correctd;
+  showFeedback(isOk,isOk?'Correct!':'Not quite — expected output: <span class="ca">'+correctd.replace(/\n/g,' → ')+'</span>',expld);
+  recordResult(isOk,q);
+  setTimeout(()=>{idx++;renderQuestion();},2200);
+}
+
+function renderSummary(){
+  const pct=Math.round((correct/questions.length)*100);
+  const r=44,cx=55,cy=55,circ=2*Math.PI*r;
+  const dash=Math.round((pct/100)*circ);
+  const msg=pct===100?'Perfect score!':pct>=80?'Great work!':pct>=60?'Good effort!':'Keep drilling!';
+  const ringColor=pct>=80?'#22c55e':pct>=60?'#f59e0b':'#f87171';
+  let missedHTML='';
+  if(missed.length){
+    missedHTML=`<div class="missed-section">
+      <div class="missed-label">Review these ${missed.length} items</div>
+      ${missed.map(q=>`<div class="mi"><span class="mi-text">${(q.prompt||'').substring(0,58)}…</span><span class="mi-kw">${q.kw||'snippet'}</span></div>`).join('')}
+    </div>`;
+  }
+  let flagHTML='';
+  if(flagged.length){
+    flagHTML=`<div class="flagged-section">
+      <div class="missed-label" style="color:var(--amber)">Flagged for review (${flagged.length})</div>
+      ${flagged.map(q=>`<div class="fl-item"><span class="fl-kw">${q.kw||'snippet'}</span><span class="fl-cat">${q.cat}</span></div>`).join('')}
+    </div>`;
+  }
+  document.getElementById('main').innerHTML=`
+    <div class="q-card summary">
+      <div class="score-ring">
+        <svg viewBox="0 0 110 110">
+          <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#1e1e36" stroke-width="10"/>
+          <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${ringColor}" stroke-width="10"
+            stroke-dasharray="${dash} ${circ}" stroke-dashoffset="${circ/4}" stroke-linecap="round"/>
+        </svg>
+        <div class="score-num">${pct}%</div>
+      </div>
+      <div class="summary-msg">${msg}</div>
+      <div class="summary-sub">${correct} correct out of ${questions.length} questions</div>
+      <div class="stat-row">
+        <div class="stat"><div class="stat-val" style="color:var(--green)">${correct}</div><div class="stat-lbl">correct</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--red)">${wrong}</div><div class="stat-lbl">wrong</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--amber)">${maxStreak}</div><div class="stat-lbl">best streak</div></div>
+        <div class="stat"><div class="stat-val" style="color:#94a3b8">${flagged.length}</div><div class="stat-lbl">flagged</div></div>
+      </div>
+      ${missedHTML}${flagHTML}
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="startQuiz()">Play again</button>
+        ${flagged.length>0?`<button class="btn btn-amber" onclick="reviewFlagged()">Review flagged</button>`:''}
+        <button class="btn" onclick="renderMenu()">Change settings</button>
+      </div>
+    </div>`;
+}
+
+renderMenu();
+</script>
+</body>
+</html>

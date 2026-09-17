@@ -1,0 +1,340 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+#app{font-family:var(--font-sans);padding:1.25rem 1rem;max-width:680px;margin:0 auto}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem}
+.title{font-size:18px;font-weight:500;color:var(--color-text-primary)}
+.scorebar{display:flex;gap:16px;font-size:13px;color:var(--color-text-secondary)}
+.sv{font-weight:500;color:var(--color-text-primary)}
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-bottom:1rem}
+.cat-tile{padding:12px 14px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);cursor:pointer;transition:background 0.12s;background:var(--color-background-primary)}
+.cat-tile:hover{background:var(--color-background-secondary)}
+.cat-tile.selected{border-color:#3949ab;background:#0d0f2a}
+.cat-name{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+.cat-tile.selected .cat-name{color:#9fa8da}
+.cat-count{font-size:12px;color:var(--color-text-secondary);margin-top:3px}
+.cat-tile.selected .cat-count{color:#5c6bc0}
+.section-label{font-size:12px;color:var(--color-text-secondary);font-weight:500;letter-spacing:0.05em;text-transform:uppercase;margin:1rem 0 0.5rem}
+.btn{padding:9px 18px;font-size:14px;font-weight:500;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:transparent;color:var(--color-text-primary);cursor:pointer;transition:background 0.12s}
+.btn:hover{background:var(--color-background-secondary)}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.btn-primary{background:#1a237e;border-color:#3949ab;color:#c5cae9}
+.btn-primary:hover{background:#283593}
+.btn-sm{padding:6px 12px;font-size:13px}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.25rem;margin-bottom:1rem}
+.badge{display:inline-block;font-size:11px;font-weight:500;padding:3px 10px;border-radius:var(--border-radius-md);margin-bottom:1rem}
+.prompt{font-size:15px;color:var(--color-text-primary);line-height:1.65;margin-bottom:1rem}
+.example{font-size:13px;color:var(--color-text-secondary);font-family:var(--font-mono);background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:0.6rem 0.9rem;margin-bottom:1rem;border-left:2px solid #3949ab}
+.input-row{display:flex;gap:8px}
+#ans{flex:1;padding:9px 13px;font-size:15px;font-family:var(--font-mono);background:var(--color-background-secondary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);color:var(--color-text-primary);outline:none}
+#ans:focus{border-color:#3949ab;box-shadow:0 0 0 2px rgba(57,73,171,0.2)}
+#ans.ok{border-color:#2e7d32;background:rgba(46,125,50,0.08)}
+#ans.bad{border-color:#c62828;background:rgba(198,40,40,0.08)}
+.fb{margin-top:0.9rem;padding:0.7rem 1rem;border-radius:var(--border-radius-md);font-size:14px;display:none;line-height:1.5}
+.fb.ok{display:block;background:rgba(46,125,50,0.1);border:0.5px solid #2e7d32;color:#66bb6a}
+.fb.bad{display:block;background:rgba(198,40,40,0.08);border:0.5px solid #c62828;color:#ef9a9a}
+.fb .ca{font-family:var(--font-mono);font-weight:500;color:#a5d6a7}
+.pips{display:flex;gap:3px;margin-bottom:1.1rem}
+.pip{height:4px;flex:1;border-radius:2px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary)}
+.pip.pc{background:#2e7d32;border-color:#2e7d32}
+.pip.pw{background:#c62828;border-color:#c62828}
+.pip.pa{background:#3949ab;border-color:#3949ab}
+.hint-btn{font-size:12px;color:var(--color-text-secondary);background:none;border:none;cursor:pointer;padding:0;text-decoration:underline;margin-top:8px;display:block}
+.hint-text{font-size:13px;color:#9fa8da;margin-top:6px;font-family:var(--font-mono);display:none}
+.summary{text-align:center;padding:1.5rem 1rem}
+.big-score{font-size:48px;font-weight:500;color:#9fa8da;margin:0.75rem 0}
+.missed-list{text-align:left;margin:1rem 0 1.5rem}
+.mi{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;padding:7px 0;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-secondary);gap:12px}
+.mk{font-family:var(--font-mono);color:#ef9a9a;font-weight:500;white-space:nowrap}
+.mode-row{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+.mode-btn{padding:6px 14px;font-size:13px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:transparent;color:var(--color-text-secondary);cursor:pointer}
+.mode-btn.active{background:#1a237e;border-color:#3949ab;color:#c5cae9}
+.mc-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:1rem}
+.mc-btn{padding:10px 14px;font-size:14px;font-family:var(--font-mono);text-align:left;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-secondary);color:var(--color-text-primary);cursor:pointer;transition:background 0.1s}
+.mc-btn:hover:not(:disabled){background:#0d0f2a;border-color:#3949ab;color:#9fa8da}
+.mc-btn.mc-ok{background:rgba(46,125,50,0.15);border-color:#2e7d32;color:#66bb6a}
+.mc-btn.mc-bad{background:rgba(198,40,40,0.1);border-color:#c62828;color:#ef9a9a}
+</style>
+
+<div id="app">
+<h2 style="position:absolute;width:1px;height:1px;overflow:hidden">Java keyword and syntax quiz</h2>
+<div class="topbar">
+  <span class="title">Java quiz</span>
+  <div class="scorebar">
+    <span>correct: <span class="sv" id="sc">0</span></span>
+    <span>wrong: <span class="sv" id="sw">0</span></span>
+  </div>
+</div>
+<div id="main"></div>
+</div>
+
+<script>
+const CATS = {
+  "Access modifiers": {color:"#1a237e",accent:"#9fa8da",questions:[
+    {kw:"public",prompt:"Makes a class, method, or variable accessible from anywhere — other classes, other packages.",example:"___ class Dog { ... }"},
+    {kw:"private",prompt:"Restricts a field or method so only the class it's declared in can use it.",example:"___ int age;"},
+    {kw:"protected",prompt:"Allows access within the same package and by subclasses, but not unrelated outside classes.",example:"___ String name;"},
+  ]},
+  "Primitives": {color:"#1b3a2a",accent:"#80cbc4",questions:[
+    {kw:"int",prompt:"Whole number type. No decimals. Range roughly -2 billion to +2 billion.",example:"___ count = 0;"},
+    {kw:"double",prompt:"Decimal (floating-point) number. More precise than float.",example:"___ price = 9.99;"},
+    {kw:"float",prompt:"Decimal number, less precise than double. Must append F to the literal.",example:"___ temp = 98.6f;"},
+    {kw:"boolean",prompt:"Can only be true or false. Nothing else.",example:"___ isReady = true;"},
+    {kw:"char",prompt:"Holds a single character. Uses single quotes.",example:"___ grade = 'A';"},
+    {kw:"long",prompt:"Like int but stores much larger whole numbers. Append L to literal.",example:"___ population = 8000000000L;"},
+    {kw:"byte",prompt:"Tiny integer — only -128 to 127. Good for raw data.",example:"___ b = 100;"},
+    {kw:"short",prompt:"Integer smaller than int — -32,768 to 32,767.",example:"___ s = 200;"},
+  ]},
+  "Class & objects": {color:"#1a1a2e",accent:"#b39ddb",questions:[
+    {kw:"class",prompt:"Declares a new class — the blueprint for creating objects.",example:"___ Cat { String name; }"},
+    {kw:"new",prompt:"Creates a fresh object (instance) from a class. Calls the constructor.",example:"Dog d = ___ Dog();"},
+    {kw:"this",prompt:"Refers to the current object inside its own method or constructor.",example:"___.name = name;"},
+    {kw:"null",prompt:"Represents a reference that points to no object at all.",example:"String s = ___;"},
+    {kw:"instanceof",prompt:"Tests whether an object is an instance of a specific class.",example:"if (obj ___ Dog) { ... }"},
+  ]},
+  "Inheritance & OOP": {color:"#1a0a2e",accent:"#ce93d8",questions:[
+    {kw:"extends",prompt:"Inherits from another class — the child class gets the parent's non-private members.",example:"class Dog ___ Animal { }"},
+    {kw:"super",prompt:"Calls the parent class constructor or accesses the parent's methods.",example:"___(name); or ___.speak();"},
+    {kw:"abstract",prompt:"Marks a class or method as incomplete — subclasses must provide the implementation.",example:"___ class Shape { ___ double area(); }"},
+    {kw:"interface",prompt:"Defines a contract — a list of method signatures a class must implement.",example:"___ Flyable { void fly(); }"},
+    {kw:"implements",prompt:"Used when a class agrees to fulfill all the methods defined in an interface.",example:"class Bird ___ Flyable { }"},
+    {kw:"override",prompt:"Not a keyword — but @Override is an annotation placed above a method to signal you're replacing the parent version.",example:"@___ public void speak() { }"},
+  ]},
+  "Control flow": {color:"#1a1200",accent:"#ffe082",questions:[
+    {kw:"if",prompt:"Runs a block only when the condition is true.",example:"___ (score > 90) { ... }"},
+    {kw:"else",prompt:"The fallback block that runs when the if-condition was false.",example:"___ { System.out.println(\"nope\"); }"},
+    {kw:"switch",prompt:"Compares a value against a series of cases and runs the matching block.",example:"___ (day) { case 1: ... }"},
+    {kw:"case",prompt:"A branch inside a switch. Runs when the switch value matches this label.",example:"___ 2: System.out.println(\"Tue\");"},
+    {kw:"default",prompt:"The catch-all branch in a switch — runs when no case matches.",example:"___ : System.out.println(\"unknown\");"},
+    {kw:"break",prompt:"Immediately exits the nearest loop or switch statement.",example:"___ ; // jumps out"},
+    {kw:"continue",prompt:"Skips the rest of the current loop iteration and jumps to the next one.",example:"___ ; // skip to next"},
+    {kw:"return",prompt:"Exits the current method and optionally sends a value back to the caller.",example:"___ x * 2;"},
+  ]},
+  "Loops": {color:"#001a10",accent:"#a5d6a7",questions:[
+    {kw:"for",prompt:"Loop with initializer, condition, and update all in one line. Use when you know the count.",example:"___ (int i = 0; i < 5; i++)"},
+    {kw:"while",prompt:"Loops as long as the condition is true. Checks before each run.",example:"___ (x > 0) { x--; }"},
+    {kw:"do",prompt:"Like while but always runs at least once — condition is checked after the body.",example:"___ { x++; } while (x < 5);"},
+  ]},
+  "Modifiers": {color:"#1a0d00",accent:"#ffcc80",questions:[
+    {kw:"static",prompt:"Belongs to the class itself, not to any specific object instance. Call it without new.",example:"public ___ void main(String[] args)"},
+    {kw:"final",prompt:"Makes a variable constant (can't change), prevents method override, or locks a class from being extended.",example:"___ int MAX = 100;"},
+    {kw:"void",prompt:"Return type meaning 'this method gives nothing back'.",example:"public ___ printName() { }"},
+    {kw:"synchronized",prompt:"Ensures only one thread can execute this method at a time — used in multithreading.",example:"public ___ void deposit() { }"},
+    {kw:"volatile",prompt:"Tells the JVM this variable may be changed by multiple threads — always read from main memory.",example:"___ boolean running = true;"},
+  ]},
+  "Exception handling": {color:"#1a0000",accent:"#ef9a9a",questions:[
+    {kw:"try",prompt:"Wraps code that might throw an exception.",example:"___ { int x = 1/0; }"},
+    {kw:"catch",prompt:"Handles a specific type of exception thrown inside a try block.",example:"___ (ArithmeticException e) { }"},
+    {kw:"finally",prompt:"Block that always runs after try/catch — used to close resources regardless of outcome.",example:"___ { file.close(); }"},
+    {kw:"throw",prompt:"Manually triggers an exception from inside your code.",example:"___ new IllegalArgumentException(\"bad\");"},
+    {kw:"throws",prompt:"Declares that a method might throw a checked exception — callers must handle it.",example:"void readFile() ___ IOException { }"},
+  ]},
+  "Code structure": {color:"#001020",accent:"#81d4fa",questions:[
+    {kw:"import",prompt:"Brings a class from another package into scope so you don't need the full path.",example:"___ java.util.Scanner;"},
+    {kw:"package",prompt:"Declares which package this file belongs to. Goes at the very top of the file.",example:"___ com.myapp.utils;"},
+    {kw:"main",prompt:"Not a keyword but the exact method signature Java looks for to start a program.",example:"public static void ___( String[] args )"},
+    {kw:"String",prompt:"Not a primitive — it's a class representing a sequence of characters. The most used type after int.",example:"___ greeting = \"Hello\";"},
+    {kw:"Scanner",prompt:"A class from java.util used to read user input from the console.",example:"___ sc = new Scanner(System.in);"},
+    {kw:"System.out.println",prompt:"The standard way to print a line of text to the console.",example:"___(\"Hello, world!\");"},
+    {kw:"ArrayList",prompt:"A resizable array from java.util. Grows and shrinks as you add/remove items.",example:"___ <String> list = new ArrayList<>();"},
+    {kw:"var",prompt:"Local variable type inference — Java figures out the type from the value on the right.",example:"___ name = \"Alice\"; // Java infers String"},
+  ]},
+  "Operators & values": {color:"#0a0a1a",accent:"#b0bec5",questions:[
+    {kw:"true",prompt:"One of the two boolean literals — the affirmative one.",example:"boolean on = ___;"},
+    {kw:"false",prompt:"The other boolean literal — represents no / off / not true.",example:"boolean off = ___;"},
+    {kw:"&&",prompt:"Logical AND — both sides must be true for the result to be true.",example:"if (a > 0 ___ b > 0)"},
+    {kw:"||",prompt:"Logical OR — at least one side must be true.",example:"if (a == 0 ___ b == 0)"},
+    {kw:"!",prompt:"Logical NOT — flips true to false and false to true.",example:"if (___ isReady)"},
+    {kw:"==",prompt:"Equality check. For primitives compares value; for objects compares reference.",example:"if (x ___ 5)"},
+    {kw:"!=",prompt:"Not-equal check. Returns true if the two sides are different.",example:"if (name ___ null)"},
+  ]},
+};
+
+let mode='type', selCats=new Set(Object.keys(CATS));
+let questions=[], idx=0, correct=0, wrong=0, missed=[], results=[];
+
+function allQ(){
+  let out=[];
+  selCats.forEach(c=>{
+    CATS[c].questions.forEach(q=>out.push({...q,cat:c}));
+  });
+  return out;
+}
+
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+function wrongChoices(correct, pool, n=3){
+  const others = pool.filter(q=>q.kw!==correct).map(q=>q.kw);
+  shuffle(others);
+  return others.slice(0,n);
+}
+
+function startQuiz(){
+  const pool=allQ();
+  if(!pool.length){renderMenu();return;}
+  questions=shuffle(pool);
+  idx=0;correct=0;wrong=0;missed=[];results=[];
+  updateScore();
+  renderQuestion();
+}
+
+function updateScore(){
+  document.getElementById('sc').textContent=correct;
+  document.getElementById('sw').textContent=wrong;
+}
+
+function renderMenu(){
+  let html=`<div class="section-label">mode</div>
+  <div class="mode-row">
+    <button class="mode-btn${mode==='type'?' active':''}" onclick="setMode('type')">Type answer</button>
+    <button class="mode-btn${mode==='mc'?' active':''}" onclick="setMode('mc')">Multiple choice</button>
+  </div>
+  <div class="section-label">categories</div>
+  <div class="cat-grid">`;
+  Object.keys(CATS).forEach(c=>{
+    const sel=selCats.has(c);
+    html+=`<div class="cat-tile${sel?' selected':''}" onclick="toggleCat('${c}')">
+      <div class="cat-name">${c}</div>
+      <div class="cat-count">${CATS[c].questions.length} questions</div>
+    </div>`;
+  });
+  const total=allQ().length;
+  html+=`</div>
+  <div style="display:flex;gap:8px;align-items:center;margin-top:0.5rem">
+    <button class="btn btn-primary" onclick="startQuiz()" ${total===0?'disabled':''}>Start quiz (${total} questions)</button>
+    <button class="btn btn-sm" onclick="selAll()">Select all</button>
+    <button class="btn btn-sm" onclick="selNone()">Clear</button>
+  </div>`;
+  document.getElementById('main').innerHTML=html;
+}
+
+function setMode(m){mode=m;renderMenu();}
+function toggleCat(c){if(selCats.has(c))selCats.delete(c);else selCats.add(c);renderMenu();}
+function selAll(){selCats=new Set(Object.keys(CATS));renderMenu();}
+function selNone(){selCats=new Set();renderMenu();}
+
+function pipHTML(){
+  return `<div class="pips">${questions.map((_,i)=>{
+    let cls='pip';
+    if(i<idx)cls+=results[i]?' pc':' pw';
+    else if(i===idx)cls+=' pa';
+    return `<div class="${cls}"></div>`;
+  }).join('')}</div>`;
+}
+
+function catStyle(cat){
+  const c=CATS[cat];
+  return `background:${c.color};color:${c.accent};border:0.5px solid ${c.accent}44`;
+}
+
+function renderQuestion(){
+  if(idx>=questions.length){renderSummary();return;}
+  const q=questions[idx];
+  const pool=allQ();
+  if(mode==='mc'){
+    const wrong3=wrongChoices(q.kw,pool);
+    const opts=shuffle([q.kw,...wrong3]);
+    document.getElementById('main').innerHTML=`
+      ${pipHTML()}
+      <div class="card">
+        <span class="badge" style="${catStyle(q.cat)}">${q.cat}</span>
+        <p class="prompt">${q.prompt}</p>
+        <div class="example">${q.example}</div>
+        <div class="mc-opts" id="mc-opts">
+          ${opts.map(o=>`<button class="mc-btn" onclick="checkMC('${o}','${q.kw}')">${o}</button>`).join('')}
+        </div>
+        <div class="fb" id="fb"></div>
+      </div>`;
+  } else {
+    document.getElementById('main').innerHTML=`
+      ${pipHTML()}
+      <div class="card">
+        <span class="badge" style="${catStyle(q.cat)}">${q.cat}</span>
+        <p class="prompt">${q.prompt}</p>
+        <div class="example">${q.example}</div>
+        <div class="input-row">
+          <input id="ans" type="text" placeholder="type the keyword..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+          <button class="btn btn-primary" id="chk-btn" onclick="checkType()">Check</button>
+        </div>
+        <button class="hint-btn" onclick="toggleHint()">show hint</button>
+        <div class="hint-text" id="ht">Starts with: <strong>${q.kw[0]}</strong> — ${q.kw.length} character${q.kw.length>1?'s':''}</div>
+        <div class="fb" id="fb"></div>
+      </div>`;
+    const inp=document.getElementById('ans');
+    inp.focus();
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter')checkType();});
+  }
+}
+
+function toggleHint(){
+  const h=document.getElementById('ht');
+  h.style.display=h.style.display==='block'?'none':'block';
+}
+
+function checkType(){
+  const inp=document.getElementById('ans');
+  const val=inp.value.trim();
+  if(!val)return;
+  const q=questions[idx];
+  const isOk=val===q.kw;
+  inp.disabled=true;
+  document.getElementById('chk-btn').disabled=true;
+  inp.className=isOk?'ok':'bad';
+  showFeedback(isOk,q);
+  recordResult(isOk,q);
+  setTimeout(()=>{idx++;updateScore();renderQuestion();},1400);
+}
+
+function checkMC(chosen, correct){
+  const btns=document.querySelectorAll('.mc-btn');
+  btns.forEach(b=>{
+    b.disabled=true;
+    if(b.textContent===correct)b.classList.add('mc-ok');
+    else if(b.textContent===chosen&&chosen!==correct)b.classList.add('mc-bad');
+  });
+  const isOk=chosen===correct;
+  const q=questions[idx];
+  showFeedback(isOk,q);
+  recordResult(isOk,q);
+  setTimeout(()=>{idx++;updateScore();renderQuestion();},1400);
+}
+
+function showFeedback(isOk,q){
+  const fb=document.getElementById('fb');
+  fb.className='fb '+(isOk?'ok':'bad');
+  fb.innerHTML=isOk?'Correct!': `Not quite — the answer is <span class="ca">${q.kw}</span>`;
+}
+
+function recordResult(isOk,q){
+  if(isOk)correct++;else{wrong++;missed.push(q);}
+  results.push(isOk);
+}
+
+function renderSummary(){
+  const pct=Math.round((correct/questions.length)*100);
+  const msg=pct===100?'Perfect score!':pct>=80?'Great job!':pct>=60?'Good effort — keep drilling!':'Keep at it — repetition builds memory!';
+  let missedHTML='';
+  if(missed.length){
+    missedHTML=`<div class="missed-list">
+      <p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:8px;text-align:left">Review these:</p>
+      ${missed.map(q=>`<div class="mi"><span style="flex:1">${q.prompt.substring(0,55)}…</span><span class="mk">${q.kw}</span></div>`).join('')}
+    </div>`;
+  }
+  document.getElementById('main').innerHTML=`
+    <div class="card summary">
+      <div class="big-score">${pct}%</div>
+      <p style="font-size:18px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px">${msg}</p>
+      <p style="font-size:14px;color:var(--color-text-secondary);margin-bottom:1.25rem">${correct} / ${questions.length} correct</p>
+      ${missedHTML}
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="startQuiz()">Play again</button>
+        <button class="btn btn-sm" onclick="renderMenu()">Change categories</button>
+      </div>
+    </div>`;
+}
+
+renderMenu();
+</script>
